@@ -2,6 +2,8 @@
 #import "Colours/Colours.h"
 #import "BHTManager.h"
 #import "BHTBundle/BHTBundle.h"
+#import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
 static UIFont * _Nullable TAEStandardFontGroupReplacement(UIFont *self, SEL _cmd, CGFloat arg1, CGFloat arg2) {
     BH_BaseImp orig  = originalFontsIMP[NSStringFromSelector(_cmd)].pointerValue;
@@ -1293,6 +1295,58 @@ static void batchSwizzlingOnClass(Class cls, NSArray<NSString*>*origSelectors, I
 %hook TFNTableView
 - (void)setShowsVerticalScrollIndicator:(BOOL)arg1 {
     %orig([BHTManager showScrollIndicator]);
+}
+%end
+
+@interface TFNScrollingSegmentedViewController : UIViewController
+- (id)parentViewController;
+@end
+
+%hook TFNScrollingSegmentedViewController
+
+-(NSInteger)pagingViewController:(id)arg1 numberOfPagesInSection:(id)arg2 { 
+	if([[self.parentViewController class] isEqual:NSClassFromString(@"THFHomeTimelineContainerViewController")]) {
+		return 1; 
+	}
+	return %orig;
+}
+
+-(NSInteger)selectedIndex { 
+	if([[self.parentViewController class] isEqual:NSClassFromString(@"THFHomeTimelineContainerViewController")]) {
+		return 1; 
+	}
+	return %orig;
+}
+
+-(NSInteger)initialSelectedIndex { 
+	if([[self.parentViewController class] isEqual:NSClassFromString(@"THFHomeTimelineContainerViewController")]) {
+		return 1; 
+	}
+	return %orig;
+}
+
+-(id)pagingViewController:(id)arg1 viewControllerAtIndexPath:(id)arg2 {
+	if([[self.parentViewController class] isEqual:NSClassFromString(@"THFHomeTimelineContainerViewController")]) {
+		return %orig(arg1, [NSIndexPath indexPathForRow:1 inSection:0]);
+	}
+	return %orig;
+}
+
+%end
+
+@interface TFNScrollingHorizontalLabelView
+- (id)delegate;
+@end
+
+%hook TFNScrollingHorizontalLabelView
+- (void)layoutSubviews {
+	if([[self.delegate class] isEqual:NSClassFromString(@"TFNScrollingSegmentedViewController")]) {
+		TFNScrollingSegmentedViewController *segmentedController = (TFNScrollingSegmentedViewController *)self.delegate;
+        if ([[segmentedController.parentViewController class] isEqual:NSClassFromString(@"THFHomeTimelineContainerViewController")]) {
+            return;
+        }
+	}
+	%orig;
 }
 %end
 
