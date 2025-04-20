@@ -1333,11 +1333,8 @@ static void refreshViewIfNeeded(UIView *view, NSTimeInterval delay) {
 }
 
 // Sets the number of tabs in the sub bar
--(NSInteger)pagingViewController:(id)arg1 numberOfPagesInSection:(id)arg2 { 
-	if([[self.parentViewController class] isEqual:NSClassFromString(@"THFHomeTimelineContainerViewController")]) {
-		return 1; 
-	}
-	return %orig;
+- (NSInteger)pagingViewController:(id)arg1 numberOfPagesInSection:(id)arg2 { 
+     return %orig;
 }
 
 // Returns the "Following" tab's view controller for both tabs, but only on homepage
